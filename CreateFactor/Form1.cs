@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 using DevComponents.DotNetBar.Controls;
 
 namespace CreateFactor
@@ -14,6 +15,7 @@ namespace CreateFactor
     public partial class Form1 : Form
     {
         private List<Order> orders=null;
+        private Order order;
         public Form1()
         {
             InitializeComponent();
@@ -21,22 +23,29 @@ namespace CreateFactor
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            order = new Order();
+            orders = new List<Order>();
             string t = DateTime.Now.ToPersianDateString();
             txtDate.Text = t;
-            string[] s = new[] { "اجرایی", "bsaa" };
-            cmbPart.DataSource = s;
+           List<string> ss=new List<string>();
+           StreamReader sr=new StreamReader("NameList.txt");
+            string line;
+            while ((line=sr.ReadLine()) != null)
+            {
+                ss.Add(line);
+            }
+
+            cmbPart.DataSource = ss;
 
 
         }
 
         private void buttonX2_Click(object sender, EventArgs e)
         {
-            Order order = new Order();
-           orders = new List<Order>();
 
+            orders.Clear();
             for (int i = 0; i < dataGridViewX1.RowCount - 1; i++)
             {
-                
                 orders.Add(new Order()
                 {
                     Description = dataGridViewX1.Rows[i].Cells[0].Value.ToString(),
@@ -47,8 +56,25 @@ namespace CreateFactor
 
             }
 
+
+
+            stiReport1.Load("Report.mrt");
+            stiReport1.Dictionary.Variables["date"].Value = txtDate.Text;
+            stiReport1.Dictionary.Variables["part"].Value = cmbPart.GetItemText(cmbPart.SelectedItem);
+            stiReport1.Dictionary.Variables["number"].Value = txtNumber.Text;
+
+            stiReport1.RegBusinessObject("Orders", orders);
+            stiReport1.Show();
+
+
+
             int x = 0;
 
+        }
+
+        private void buttonX1_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }
